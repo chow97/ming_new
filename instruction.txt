@@ -1,0 +1,7 @@
+1. first move the folder to Desktop
+
+2. then add cod_statement, bank_slip, bank_statement into the folder (must follow wording)
+
+3. then double tap (app) ket it run then type the folder name you put in Desktop
+
+4. then you will see the result
