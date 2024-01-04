@@ -42,10 +42,26 @@ def get_stmt_dates(filename, directory):
     for dirnames in unique_values:
         os.makedirs(os.path.join(directory, dirnames), exist_ok=True)
 
+def get_cod_date(filename):
+    # Read the PDF
+    directory = "COD statement"
+    path = os.path.join(directory, filename)
+    data1 = camelot.read_pdf(path, flavor='stream', pages='all') 
+
+    df_list = [table.df for table in data1]
+    # Concatenate all the DataFrames in the list into a single DataFrame
+    df = pd.concat(df_list, ignore_index=True)
+
+    date = df.iloc[2, 1].split("/")[-1]
+
+    date = date.replace('.', '_')
+    # remove all whitespace
+    date = date.strip()
+
+    return(date)
 
 
-
-############# MAIN #################################################
+####################################### MAIN #################################################
 if __name__ == "__main__":
     # Prompt the user for the folder name
     folder_name = input("Please enter the folder name: ")
