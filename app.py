@@ -4,6 +4,12 @@ import numpy as np
 import os
 import shutil
 
+from ctypes.util import find_library
+find_library("gs")
+
+# gs_path = '/opt/homebrew/bin/gs'
+# if os.path.isfile(gs_path):
+#     os.environ['PATH'] += os.pathsep + os.path.dirname(gs_path)
 
 def get_stmt_dates(filename, directory):
     # Read the PDF
