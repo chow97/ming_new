@@ -3,22 +3,29 @@ import pandas as pd
 import numpy as np
 import os
 
-def get_stmt_dates(filename, directory):
-    # Initialize an empty list to store DataFrames
-    df_list = []
+def extract_tables_from_pdf(pdf_path, headers=None):
+    all_tables = []  # List to store all DataFrames
 
-    # Open the PDF
-    with pdfplumber.open(filename) as pdf:
-        # Iterate over each page in the PDF
+    with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
-            # Extract tables from the current page
-            for table in page.extract_tables():
-                # Convert the table to a DataFrame and append to list
-                df_list.append(pd.DataFrame(table[1:], columns=table[0]))
+            tables = page.extract_tables()
+            for table in tables:
+                if headers:
+                    df = pd.DataFrame(table, columns=headers)  # Use provided headers
+                else:
+                    df = pd.DataFrame(table)  # No headers provided, use default indexing
+                all_tables.append(df)
+
+    return all_tables
+
+def get_stmt_dates(filename, directory):
+
+    df_list = extract_tables_from_pdf(filename)
 
     # Concatenate all DataFrames in the list into a single DataFrame
     df = pd.concat(df_list, ignore_index=True)
 
+    df.drop(index=0, inplace=True)
     # Rename columns assuming the first row is the header
     df.columns = ['date', 'description', 'debit', 'credit', 'balance']
 
@@ -35,49 +42,10 @@ def get_stmt_dates(filename, directory):
     for dirnames in unique_values:
         os.makedirs(os.path.join(directory, dirnames), exist_ok=True)
 
-# Usage example:
-# get_stmt_dates('path_to_pdf', 'path_to_directory')
-
-# import camelot
-# import pandas as pd
-# import numpy as np
-# import os
-# import shutil
-
-# from ctypes.util import find_library
-# find_library("gs")
-
-# gs_path = '/opt/homebrew/bin/gs'
-# if os.path.isfile(gs_path):
-#     os.environ['PATH'] += os.pathsep + os.path.dirname(gs_path)
-
-# def get_stmt_dates(filename, directory):
-#     # Read the PDF
-#     data = camelot.read_pdf(filename, pages='all')
-
-#     # Convert each table into a DataFrame and store them in a list
-#     df_list = [table.df for table in data]
-
-#     # Concatenate all the DataFrames in the list into a single DataFrame
-#     df = pd.concat(df_list, ignore_index=True)
-
-#     # Make the first row the name
-#     df.columns = ['date', 'description', 'debit', 'credit', 'balance']
-#     df = df.drop(df.index[0])
-
-#     #Use the [] operator to select all rows from the df where the value in the 'credit' column is not an empty string
-#     df = df[df['credit'] != '']
-
-#     # Get unique values in 'date' column
-#     unique_values = df['date'].unique()
-
-#     # Replace '/' with '-' in each element
-#     unique_values = np.array([str(item).replace('/', '_') for item in unique_values])
-#     # mkdir all the dates from bank statement into printable
-#     for dirnames in unique_values:
-#         os.makedirs(printable_dir + os.sep + dirnames)
 
 
+
+############# MAIN #################################################
 if __name__ == "__main__":
     # Prompt the user for the folder name
     folder_name = input("Please enter the folder name: ")
